@@ -1,24 +1,15 @@
 # redmine-mcp
 
-A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for Redmine, built in TypeScript. Designed for workflows where Jira is the source of truth and Redmine is used for internal time tracking and task mirroring.
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for Redmine, built in TypeScript. Works with any Redmine instance — statuses and activity types are fetched dynamically at startup.
 
 ## Features
 
-- **Mirror Jira tickets** to Redmine with one command — auto-assigns to you, adds Jira back-link, maps status
-- **Log time** on any issue with activity type and optional comment
+- **Create issues** — free-form description, any status, any tracker. Optional Jira back-link convenience params.
+- **Log time** with any activity type (fetched from your Redmine instance)
 - **List your time entries** with issue names, filterable by project or issue
-- **Update issues** — done percentage, estimated hours, status sync
-- **List your issues** — filterable by project and status
-
-## Jira → Redmine Status Mapping
-
-| Jira | Redmine |
-|------|---------|
-| In Progress | In Progress |
-| QAT | Code Review |
-| UAT | Test DEV |
-| Done | Resolved |
-| Deployed | Closed |
+- **Update issues** — done percentage, estimated hours, status, description
+- **List your issues** — filterable by project and status group
+- **List statuses** — discover all available statuses on your Redmine instance
 
 ## Installation
 
@@ -55,19 +46,19 @@ Run `/mcp` and reconnect the `redmine` server, or restart Claude Code.
 ## Available Tools
 
 ### `create_issue`
-Create a Redmine issue mirroring a Jira ticket.
+Create a Redmine issue.
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
 | `subject` | ✓ | Issue title |
-| `jira_key` | ✓ | e.g. `SCRUM-123` |
-| `jira_url` | ✓ | Full Jira issue URL |
-| `jira_status` | ✓ | `In Progress` \| `QAT` \| `UAT` \| `Done` \| `Deployed` |
+| `description` | | Free-form description |
+| `status` | | Redmine status name (default: `New`) |
 | `tracker` | | `Feature` (default) \| `Bug` \| `Support` \| `Request` |
 | `estimated_hours` | | Estimated time in hours |
 | `done_ratio` | | Completion percentage 0–100 |
 | `project_identifier` | | Overrides default project |
-| `description` | | Extra text appended below Jira link |
+| `jira_key` | | e.g. `SCRUM-123` — prepends a Jira back-link to the description |
+| `jira_url` | | Full Jira issue URL (used with `jira_key`) |
 
 ### `log_time`
 Log hours on a Redmine issue.
@@ -76,7 +67,7 @@ Log hours on a Redmine issue.
 |-----------|----------|-------------|
 | `issue_id` | ✓ | Redmine issue ID |
 | `hours` | ✓ | e.g. `1.5` |
-| `activity` | | `Development` (default) \| `Over` \| `Estimate` |
+| `activity` | | Activity name from your Redmine instance (uses first active activity if omitted) |
 | `comment` | | Optional comment |
 | `spent_on` | | Date `YYYY-MM-DD` (default: today) |
 
@@ -86,18 +77,14 @@ Update fields on an existing issue.
 | Parameter | Required | Description |
 |-----------|----------|-------------|
 | `issue_id` | ✓ | Redmine issue ID |
+| `status` | | New Redmine status name |
 | `done_ratio` | | Completion percentage 0–100 |
 | `estimated_hours` | | Estimated time in hours |
-| `jira_status` | | Mirror a new Jira status |
 | `subject` | | New title |
+| `description` | | New description (replaces existing) |
 
-### `update_status`
-Shorthand to sync only the status from a Jira transition.
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `issue_id` | ✓ | Redmine issue ID |
-| `jira_status` | ✓ | New Jira status to mirror |
+### `list_statuses`
+List all available status names on your Redmine instance. Useful for discovering valid values for the `status` parameter.
 
 ### `get_issue`
 Fetch issue details including spent hours.
@@ -128,14 +115,6 @@ npm run build  # one-off build
 
 After rebuilding, reconnect the server in Claude Code via `/mcp`.
 
-## Time Entry Activities
+## Dynamic Metadata
 
-Configured for the default Redmine activity types:
-
-| Name | ID |
-|------|----|
-| Development | 9 |
-| Over | 10 |
-| Estimate | 11 |
-
-These IDs vary per Redmine installation — update `ACTIVITY_IDS` in `src/index.ts` if needed.
+Statuses and time entry activities are fetched from your Redmine instance at startup — no hardcoded IDs. Use the `list_statuses` tool to see what's available on your instance.
