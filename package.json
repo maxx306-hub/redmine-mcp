@@ -1,0 +1,19 @@
+{
+  "name": "redmine-mcp",
+  "version": "1.0.0",
+  "description": "Redmine MCP server for Claude Code",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.17",
+    "typescript": "^5.0.0"
+  }
+}
