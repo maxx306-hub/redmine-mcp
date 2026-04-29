@@ -57,8 +57,6 @@ Create a Redmine issue.
 | `estimated_hours` | | Estimated time in hours |
 | `done_ratio` | | Completion percentage 0–100 |
 | `project_identifier` | | Overrides default project |
-| `jira_key` | | e.g. `SCRUM-123` — prepends a Jira back-link to the description |
-| `jira_url` | | Full Jira issue URL (used with `jira_key`) |
 
 ### `log_time`
 Log hours on a Redmine issue.

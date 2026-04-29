@@ -73,21 +73,17 @@ const TRACKER_IDS: Record<string, number> = { Feature: 2, Bug: 1, Support: 3, Re
 const tools: Tool[] = [
   {
     name: "create_issue",
-    description:
-      "Create a Redmine issue. Auto-assigns to you. " +
-      "Optionally provide jira_key + jira_url to prepend a Jira back-link to the description.",
+    description: "Create a Redmine issue. Auto-assigns to you.",
     inputSchema: {
       type: "object",
       properties: {
-        subject:         { type: "string", description: "Issue title" },
-        description:     { type: "string", description: "Issue description (free text)" },
-        status:          { type: "string", description: "Redmine status name, e.g. 'In Progress'. Defaults to 'New'" },
-        tracker:         { type: "string", enum: ["Feature", "Bug", "Support", "Request"], description: "Tracker type (default: Feature)" },
-        estimated_hours: { type: "number", description: "Estimated time in hours" },
-        done_ratio:      { type: "number", description: "Completion percentage 0–100" },
+        subject:            { type: "string", description: "Issue title" },
+        description:        { type: "string", description: "Issue description (free text)" },
+        status:             { type: "string", description: "Redmine status name, e.g. 'In Progress'. Defaults to 'New'" },
+        tracker:            { type: "string", enum: ["Feature", "Bug", "Support", "Request"], description: "Tracker type (default: Feature)" },
+        estimated_hours:    { type: "number", description: "Estimated time in hours" },
+        done_ratio:         { type: "number", description: "Completion percentage 0–100" },
         project_identifier: { type: "string", description: `Project slug (default: ${DEFAULT_PROJECT || "set via REDMINE_DEFAULT_PROJECT"})` },
-        jira_key:        { type: "string", description: "Optional Jira key, e.g. SCRUM-123 — prepends a back-link to the description" },
-        jira_url:        { type: "string", description: "Optional Jira issue URL (used with jira_key)" },
       },
       required: ["subject"],
     },
@@ -224,24 +220,15 @@ async function handleCreateIssue(args: {
   estimated_hours?: number;
   done_ratio?: number;
   project_identifier?: string;
-  jira_key?: string;
-  jira_url?: string;
 }): Promise<string> {
-  const project    = args.project_identifier || DEFAULT_PROJECT;
-  const trackerId  = TRACKER_IDS[args.tracker ?? "Feature"];
-  const statusId   = args.status ? resolveStatus(args.status) : resolveStatus("New");
-
-  const descParts: string[] = [];
-  if (args.jira_key && args.jira_url) descParts.push(`*Jira:* [${args.jira_key}](${args.jira_url})`);
-  if (args.description) {
-    if (descParts.length) descParts.push("");
-    descParts.push(args.description);
-  }
+  const project   = args.project_identifier || DEFAULT_PROJECT;
+  const trackerId = TRACKER_IDS[args.tracker ?? "Feature"];
+  const statusId  = args.status ? resolveStatus(args.status) : resolveStatus("New");
 
   const issueBody: Record<string, unknown> = {
     project_id:     project,
     subject:        args.subject,
-    description:    descParts.join("\n"),
+    description:    args.description ?? "",
     assigned_to_id: REDMINE_USER_ID,
     status_id:      statusId,
     tracker_id:     trackerId,
